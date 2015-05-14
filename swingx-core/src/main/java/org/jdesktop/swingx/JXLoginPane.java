@@ -82,6 +82,8 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.plaf.basic.BasicHTML;
 import javax.swing.text.View;
 
+import javax.swing.event.EventListenerList;
+
 import org.jdesktop.beans.JavaBean;
 import org.jdesktop.swingx.action.AbstractActionExt;
 import org.jdesktop.swingx.auth.DefaultUserNameStore;
@@ -225,9 +227,30 @@ public class JXLoginPane extends JXPanel {
      * A combo box presenting the user with a list of servers to which they
      * may log in. This is an optional feature, which is only enabled if
      * the List of servers supplied to the JXLoginPane has a length greater
-     * than 1.
+     * than 1, or if the 'alwaysShowServers' flag is set to true..
      */
     private JComboBox serverCombo;
+    /**
+     * Set to true if the servers combo should always be shown, regardless
+     * of the number of server strings set. This is most useful when the
+     * editServers flag is also set. When editServers is true, the user will
+     * be presented with a hyperlink allowing them to edit the list of
+     * servers.
+     */
+    private boolean alwaysShowServers;
+    /**
+     * When true, and when the serverCombo is visible, a hyperlink is presented
+     * to the user allowing them to edit the list of servers. Since the content
+     * of the server editor is so particular to the application, you must
+     * register a handler to handle the action. This is done by registering a
+     * "editServerListener".
+     */
+    private boolean editServers;
+    /**
+     * The hyperlink used for invoking the user provided edit server action
+     */
+    private JXHyperlink editServersLink;
+    private EventListenerList events = new EventListenerList();
     /**
      * Check box presented if a PasswordStore is used, allowing the user to decide whether to
      * save their password
@@ -575,9 +598,22 @@ public class JXLoginPane extends JXPanel {
 
         //create the server combo box if necessary
         JLabel serverLabel = new JLabel(UIManagerExt.getString(CLASS_NAME + ".serverString", getLocale()));
-        if (servers.size() > 1) {
+        if (servers.size() > 1 || alwaysShowServers) {
             serverCombo = new JComboBox(servers.toArray());
             serverLabel.setLabelFor(serverCombo);
+            if (editServers) {
+                editServersLink = new JXHyperlink();
+                editServersLink.setText(UIManagerExt.getString(CLASS_NAME + ".editServersString", getLocale()));
+                editServersLink.addActionListener(new ActionListener() {
+                    public void actionPerformed(ActionEvent e) {
+                        //simply delegates to the user provided handler(s)
+                        for (ActionListener a : events.getListeners(ActionListener.class)) {
+                            a.actionPerformed(e);
+                        }
+                    }
+                });
+            }
+
         } else {
             serverCombo = null;
         }
@@ -645,6 +681,18 @@ public class JXLoginPane extends JXPanel {
             gridBagConstraints.weightx = 1.0;
             gridBagConstraints.insets = new Insets(0, 0, 5, 0);
             loginPanel.add(serverCombo, gridBagConstraints);
+            
+            if (editServersLink != null) {
+                gridBagConstraints = new GridBagConstraints();
+                gridBagConstraints.gridx = 2;
+                gridBagConstraints.gridy = 2;
+                gridBagConstraints.gridwidth = 1;
+                gridBagConstraints.anchor = GridBagConstraints.LINE_START;
+                gridBagConstraints.fill = GridBagConstraints.NONE;
+                gridBagConstraints.weightx = 0.0;
+                gridBagConstraints.insets = new Insets(0, 5, 5, 0);
+                loginPanel.add(editServersLink, gridBagConstraints);
+            }
             
             gridBagConstraints = new GridBagConstraints();
             gridBagConstraints.gridx = 0;
@@ -866,6 +914,28 @@ public class JXLoginPane extends JXPanel {
         }
     }
 
+    public void setAlwaysShowServers(boolean b) {
+        boolean old = alwaysShowServers;
+        alwaysShowServers = b;
+        recreateLoginPanel();
+        firePropertyChange("alwaysShowServers", old, alwaysShowServers);
+    }
+    
+    public final boolean isAlwaysShowServers() {
+        return alwaysShowServers;
+    }
+    
+    public void setEditServers(boolean b) {
+        boolean old = editServers;
+        editServers = b;
+        recreateLoginPanel();
+        firePropertyChange("editServers", old, editServers);
+    }
+    
+    public final boolean isEditServers() {
+        return editServers;
+    }
+    
     private LoginListener getDefaultLoginListener() {
         if (defaultLoginListener == null) {
             defaultLoginListener = new LoginListenerImpl();
@@ -1132,6 +1202,40 @@ public class JXLoginPane extends JXPanel {
         super.setLocale(l);
         reinitLocales(l);
     }
+    
+    //-------------------------------------------------------------- Events
+    
+    /**
+     * Adds a listener which is invoked if the user clicks to edit the list
+     * of servers.
+     *
+     * @param listener
+     */
+    public void addEditServersListener(ActionListener listener) {
+        events.add(ActionListener.class, listener);
+    }
+    
+    /**
+     * Removes a listener that was previously added. If this listener is
+     * null or is not registered with this class, then this method call
+     * has no effect.
+     *
+     * @param listener
+     */
+    public void removeEditServersListener(ActionListener listener) {
+        events.remove(ActionListener.class, listener);
+    }
+    
+    /**
+     * Gets the array of listeners registered for listening to the event
+     * where the user edits the server list manually.
+     *
+     * @return
+     */
+    public ActionListener[] getEditServersListeners() {
+        return events.getListeners(ActionListener.class);
+    }
+    
     //-------------------------------------------------------------- Methods
 
     /**
