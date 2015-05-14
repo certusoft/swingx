@@ -22,3 +22,6 @@ You can build SwingX by going to the command line and typing
 mvn package
 
 That should be it--this will test and build swingx.jar in the target directory. 
+
+You can bundle the swingx-all jar by going to the command line and typing
+mvn -DskipTests=true -Pjvnet-release package

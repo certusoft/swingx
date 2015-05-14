@@ -114,7 +114,7 @@ public class PaintUtils {
      * gradient is left to right it will be resized to fill the entire width.
      * If the gradient is top to bottom it will be resized to fill the entire
      * height. If the gradient is on an angle it will be resized to go from
-     * one corner to the other of the rectangle formed by (0,0 -> width,height).
+     * one corner to the other of the rectangle formed by (0,0 -&gt; width,height).
      *
      * This method can resize java.awt.GradientPaint, java.awt.LinearGradientPaint,
      * and the LinearGradientPaint implementation from Apache's Batik project. Note,

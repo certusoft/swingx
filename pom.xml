@@ -38,6 +38,8 @@
         <artifactId>maven-javadoc-plugin</artifactId>
         <version>2.9</version>
         <configuration>
+            <failOnError>false</failOnError>
+            <additionalparam>-Xdoclint:none</additionalparam>
           <tags>
             <tag>
               <!-- implementation tag for methods -->

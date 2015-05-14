@@ -62,9 +62,9 @@ public class AbstractPainterTest {
     @Test
     public void testDefaults() {
         assertThat(p.getFilters().length, is(0));
-        assertThat(p.getInterpolation(), is(AbstractPainter.Interpolation.NearestNeighbor));
+        assertThat(p.getInterpolation(), is(AbstractPainter.Interpolation.Bicubic));
         assertThat(p.isAntialiasing(), is(true));
-        assertThat(p.isCacheable(), is(false));
+        assertThat(p.isCacheable(), is(true));
         assertThat(p.isCacheCleared(), is(true));
         assertThat(p.isDirty(), is(false));
         assertThat(p.isInPaintContext(), is(false));

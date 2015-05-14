@@ -94,11 +94,11 @@ public abstract class AbstractPainter<T> extends AbstractBean implements Painter
      */
     private transient SoftReference<BufferedImage> cachedImage;
     private boolean cacheCleared = true;
-    private boolean cacheable = false;
+    private boolean cacheable = true;
     private boolean dirty = false;
     private BufferedImageOp[] filters = new BufferedImageOp[0];
     private boolean antialiasing = true;
-    private Interpolation interpolation = Interpolation.NearestNeighbor;
+    private Interpolation interpolation = Interpolation.Bicubic;
     private boolean visible = true;
     private boolean inPaintContext;
 
@@ -139,7 +139,7 @@ public abstract class AbstractPainter<T> extends AbstractBean implements Painter
     public void setFilters(BufferedImageOp ... effects) {
         if (effects == null) effects = new BufferedImageOp[0];
         BufferedImageOp[] old = getFilters();
-        this.filters = new BufferedImageOp[effects.length];
+        this.filters = new BufferedImageOp[effects == null ? 0 : effects.length];
         System.arraycopy(effects, 0, this.filters, 0, this.filters.length);
         setDirty(true);
         firePropertyChange("filters", old, getFilters());
@@ -305,8 +305,9 @@ public abstract class AbstractPainter<T> extends AbstractBean implements Painter
     protected void setDirty(boolean d) {
         boolean old = isDirty();
         this.dirty = d;
-        firePropertyChange("dirty", old, isDirty());
-        if (isDirty()) {
+        boolean newDirty = isDirty();
+        firePropertyChange("dirty", old, newDirty);
+        if (newDirty) {
             clearCache();
         }
     }
