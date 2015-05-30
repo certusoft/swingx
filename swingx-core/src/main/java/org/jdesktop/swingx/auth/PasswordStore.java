@@ -51,5 +51,5 @@ public abstract class PasswordStore {
      * This should attempt to remove the given username from the password store, as well as any associated password.
      * @param username The username to remove
      */
-    public abstract void removeUserPassword(String username);
+    public abstract void removeUserPassword(String username, String server);
 }
